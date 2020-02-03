@@ -1,10 +1,28 @@
+#include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
-struct DoubleLinkedList {
+#define TRUE 1
+#define FALSE !TRUE
+
+
+struct DoubleLinkedList
+{
     char *content;
     struct DoubleLinkedList *prev, *next;
 
 };
+
+
+void reportMallocErr(size_t condition)
+{
+    if (condition == 0)
+    {
+        fprintf(stderr, "malloc failed: not enough memory\n");
+        exit(1);
+    }
+}
+
 
 int main(int argc, char* argv[]) {
 
@@ -37,45 +55,40 @@ int main(int argc, char* argv[]) {
     }
 
     // create buffer for getline()
-    char *buffer = (char *)malloc(INT_MAX * sizeof(char));
-    if (buffer == NULL)
-    {
-        fprintf(stderr, "malloc failed: not enough memory\n");
-        exit(1);
-    }
+    size_t buffer_size = INT_MAX;
 
     // load lines to a double linked list
-    struct DoubleLinkedList *line;
+    struct DoubleLinkedList *line = (struct DoubleLinkedList *)malloc(sizeof(struct DoubleLinkedList));
+    reportMallocErr(line != NULL);
+
+    // allocate memory for content, initialize prev and next to null
+    line->content = (char *)malloc(buffer_size * sizeof(char));
+    reportMallocErr(line->content != NULL);
     line->prev = NULL;
     line->next = NULL;
-    size_t if_getline = getline(&buffer, INT_MAX, fin);
-    while (if_getline != -1)
+    size_t if_getline = getline(&(line->content), &buffer_size, fin);
+    while (if_getline > 1)
     {
-        line->content = buffer;
         line->next = (struct DoubleLinkedList *)malloc(sizeof(struct DoubleLinkedList));
+        reportMallocErr(line->next != NULL);
         struct DoubleLinkedList *prev_line = line;
         line = line->next;
+        // allocate memory for content, initialize prev to prev and next to null
+        line->content = (char *)malloc(buffer_size * sizeof(char));
+        reportMallocErr(line->content != NULL);
         line->prev = prev_line;
-        lines->next = NULL;
-        if_getline = getline(&buffer, INT_MAX, fin);
+        line->next = NULL;
+        if_getline = getline(&(line->content), &buffer_size, fin);
     }
-    free(buffer);
 
-    // output lines
-    struct DoubleLinkedList *curr_line;
-    while(true)
+    // output lines and clean up memory
+    while (line->prev != NULL)
     {
-        curr_line = line;
         line = line->prev;
-        free(curr_line);
-
-        fprintf(fout, line->content);
-
-        if (line->prev != NULL)
-        {
-            break;
-        }
+        free(line->next);
+        fprintf(fout, "%s", line->content);
     }
+    free(line);
 
     // close files
     if (argc >= 2)
