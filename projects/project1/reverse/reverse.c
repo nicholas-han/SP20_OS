@@ -33,6 +33,13 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    if (argc == 3)
+    {
+        fprintf(stdout, "%s", argv[1]);
+        fprintf(stdout, "%s", argv[2]);
+
+    }
+    return 0;
     // make sure input and output file names are different
     if (argc == 3 && argv[1] == argv[2])
     {
