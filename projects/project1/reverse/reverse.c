@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define TRUE 1
 #define FALSE !TRUE
@@ -33,20 +36,6 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    if (argc == 3)
-    {
-        fprintf(stdout, "%s", argv[1]);
-        fprintf(stdout, "%s", argv[2]);
-
-    }
-    return 0;
-    // make sure input and output file names are different
-    if (argc == 3 && argv[1] == argv[2])
-    {
-        fprintf(stderr, "Input and output file must differ\n");
-        exit(1);
-    }
-
     // creat io objects, std by default
     FILE *fin = stdin, *fout = stdout;
 
@@ -54,17 +43,36 @@ int main(int argc, char* argv[]) {
     if (argc >= 2)
     {
         fin = fopen(argv[1], "r");
+        if (fin == NULL)
+        {
+            fprintf(stderr, "%s \'%s\'\n", "reverse: cannot open file", argv[1]);
+            exit(1);
+        }
     }
 
+    // make sure input and output file names are different
     if (argc == 3)
     {
+        struct stat *statbuf1 = (struct stat *)malloc(sizeof(struct stat));
+        struct stat *statbuf2 = (struct stat *)malloc(sizeof(struct stat));
+        stat(argv[1], statbuf1);
+        stat(argv[2], statbuf2);
+        if(statbuf1->st_ino == statbuf2->st_ino)
+        {
+            fprintf(stderr, "reverse: input and output file must differ\n");
+            exit(1);
+        }
+
         fout = fopen(argv[2], "w");
+        if (fout == NULL)
+        {
+            fprintf(stderr, "%s \'%s\'\n", "reverse: cannot open file", argv[2]);
+            exit(1);
+        }
     }
 
-    // create buffer for getline()
-    size_t buffer_size = INT_MAX;
-
     // load lines to a double linked list
+    size_t buffer_size = INT_MAX;
     struct DoubleLinkedList *line = (struct DoubleLinkedList *)malloc(sizeof(struct DoubleLinkedList));
     reportMallocErr(line != NULL);
 
@@ -73,8 +81,8 @@ int main(int argc, char* argv[]) {
     reportMallocErr(line->content != NULL);
     line->prev = NULL;
     line->next = NULL;
-    size_t if_getline = getline(&(line->content), &buffer_size, fin);
-    while (if_getline > 1)
+    int if_getline = getline(&(line->content), &buffer_size, fin);
+    while (if_getline > -1)
     {
         line->next = (struct DoubleLinkedList *)malloc(sizeof(struct DoubleLinkedList));
         reportMallocErr(line->next != NULL);
