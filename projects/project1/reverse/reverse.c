@@ -81,8 +81,7 @@ int main(int argc, char* argv[]) {
     reportMallocErr(line->content != NULL);
     line->prev = NULL;
     line->next = NULL;
-    int if_getline = getline(&(line->content), &buffer_size, fin);
-    while (if_getline > -1)
+    while (getline(&(line->content), &buffer_size, fin) > -1)
     {
         line->next = (struct DoubleLinkedList *)malloc(sizeof(struct DoubleLinkedList));
         reportMallocErr(line->next != NULL);
@@ -93,7 +92,6 @@ int main(int argc, char* argv[]) {
         reportMallocErr(line->content != NULL);
         line->prev = prev_line;
         line->next = NULL;
-        if_getline = getline(&(line->content), &buffer_size, fin);
     }
 
     // output lines and clean up memory
