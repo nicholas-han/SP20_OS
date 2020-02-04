@@ -21,12 +21,13 @@ int main(int argc, char *argv[])
             exit(1);
         }
         // unpack all characters
-        while (!feof(fp))
+        while (1)
         {
             size_t counter;
             char buffer;
             fread(&counter, 4, 1, fp);
             fread(&buffer, 1, 1, fp);
+            if (feof(fp)) break;
             for (size_t i = 0; i < counter; i++)
             {
                 fprintf(stdout, "%c", buffer);
