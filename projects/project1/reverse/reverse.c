@@ -27,7 +27,7 @@ void reportMallocErr(size_t condition)
 }
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
     // check the number of arguments
     if (argc >= 4)
