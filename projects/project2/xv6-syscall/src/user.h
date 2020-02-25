@@ -8,6 +8,7 @@ int wait(void);
 int pipe(int*);
 int write(int, const void*, int);
 int read(int, void*, int);
+int getreadcount(void); // add getreadcount() syscall
 int close(int);
 int kill(int);
 int exec(char*, char**);
